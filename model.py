@@ -45,3 +45,13 @@ class SODModel(nn.Module):
         x = self.enc1(x)
         x = self.enc2(x)
         x = self.enc3(x)
+         # Decoder
+        x = self.dec1(x)
+        x = self.dec2(x)
+        x = self.dec3(x)
+
+        # Output
+        x = self.out(x)
+        x = torch.sigmoid(x)
+
+        return x  
