@@ -40,3 +40,8 @@ class SODModel(nn.Module):
         )
 
         self.out = nn.Conv2d(8, 1, kernel_size=1)
+    def forward(self, x):
+        # Encoder
+        x = self.enc1(x)
+        x = self.enc2(x)
+        x = self.enc3(x)
