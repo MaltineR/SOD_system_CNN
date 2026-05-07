@@ -3,12 +3,12 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model import BaselineSODModel
+from model import BatchNormSODModel
 from data_loader import create_loaders
 
 
-MODEL_PATH = "saved_models/best_baseline_model.pth"
-OUTPUT_DIR = "outputs"
+MODEL_PATH = "saved_models/batchnorm_model.pth"
+OUTPUT_DIR = "outputs/batchnorm"
 
 
 def compute_metrics(pred, mask):
@@ -80,7 +80,7 @@ def evaluate():
 
     _, _, test_loader = create_loaders()
 
-    model = BaselineSODModel().to(device)
+    model = BatchNormSODModel().to(device)
 
     model.load_state_dict(
         torch.load(MODEL_PATH, map_location=device)
@@ -119,7 +119,7 @@ def evaluate():
     avg_f1 = total_f1 / num_batches
     avg_mae = total_mae / num_batches
 
-    print("\n===== TEST RESULTS =====")
+    print("\n===== BATCHNORM TEST RESULTS =====")
     print(f"IoU       : {avg_iou:.4f}")
     print(f"Precision : {avg_precision:.4f}")
     print(f"Recall    : {avg_recall:.4f}")
