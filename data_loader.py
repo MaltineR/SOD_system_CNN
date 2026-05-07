@@ -58,12 +58,46 @@ class SODDataset(Dataset):
 
       
         if self.augment:
+        # Horizontal flip
             if random.random() > 0.5:
                 image = cv2.flip(image, 1)
                 mask = cv2.flip(mask, 1)
 
+            # Brightness variation
             brightness_factor = random.uniform(0.8, 1.2)
             image = np.clip(image * brightness_factor, 0, 255).astype(np.uint8)
+
+            # Contrast variation
+            contrast_factor = random.uniform(0.8, 1.2)
+            image = np.clip((image - 127.5) * contrast_factor + 127.5, 0, 255).astype(np.uint8)
+
+            # Small rotation
+            if random.random() > 0.5:
+                angle = random.uniform(-10, 10)
+                h, w = image.shape[:2]
+                center = (w // 2, h // 2)
+
+                matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+                image = cv2.warpAffine(
+                    image,
+                    matrix,
+                    (w, h),
+                    flags=cv2.INTER_LINEAR,
+                    borderMode=cv2.BORDER_REFLECT
+                )
+
+                mask = cv2.warpAffine(
+                    mask,
+                    matrix,
+                    (w, h),
+                    flags=cv2.INTER_NEAREST,
+                    borderMode=cv2.BORDER_REFLECT
+                )
+
+            # Light blur
+            if random.random() > 0.7:
+                image = cv2.GaussianBlur(image, (3, 3), 0)
 
         # Normalize image to 0-1
         image = image.astype(np.float32) / 255.0

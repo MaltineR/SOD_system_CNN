@@ -6,9 +6,9 @@ from model import DropoutSODModel
 from data_loader import create_loaders
 
 
-MODEL_NAME = "dropout"
+MODEL_NAME = "agumentations"
 MODEL_SAVE_PATH = f"saved_models/{MODEL_NAME}_model.pth"
-
+LEARNING_RATE = 5e-4
 
 def iou(pred, mask):
     pred = (pred > 0.5).float()
@@ -44,7 +44,7 @@ def train():
     model = DropoutSODModel().to(device)
 
     bce = nn.BCELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     best = 1e9
     patience = 5
@@ -131,4 +131,3 @@ def train():
 
 if __name__ == "__main__":
     train()
-    

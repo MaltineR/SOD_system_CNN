@@ -7,8 +7,8 @@ from model import DropoutSODModel
 from data_loader import create_loaders
 
 
-MODEL_PATH = "saved_models/dropout_model.pth"
-OUTPUT_DIR = "outputs/dropout"
+MODEL_PATH = "saved_models/agumentations_model.pth"
+OUTPUT_DIR = "outputs/agumentations"
 
 
 def compute_metrics(pred, mask):
