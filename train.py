@@ -7,7 +7,9 @@ from data_loader import create_loaders
 
 
 MODEL_NAME = "unet"
+
 MODEL_SAVE_PATH = f"saved_models/{MODEL_NAME}_model.pth"
+CHECKPOINT_PATH = f"checkpoints/{MODEL_NAME}_checkpoint.pth"
 
 LEARNING_RATE = 1e-3
 EPOCHS = 25
@@ -38,6 +40,7 @@ def precision_recall_f1(pred, mask):
 
 def train():
     os.makedirs("saved_models", exist_ok=True)
+    os.makedirs("checkpoints", exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
@@ -52,8 +55,25 @@ def train():
     best = 1e9
     patience = 7
     wait = 0
+    start_epoch = 0
 
-    for epoch in range(EPOCHS):
+    
+    if os.path.exists(CHECKPOINT_PATH):
+        checkpoint = torch.load(CHECKPOINT_PATH, map_location=device)
+
+        model.load_state_dict(checkpoint["model_state"])
+        optimizer.load_state_dict(checkpoint["optimizer_state"])
+
+        start_epoch = checkpoint["epoch"] + 1
+        best = checkpoint["best_val_loss"]
+        wait = checkpoint["wait"]
+
+        print(f"Checkpoint found. Resuming training from epoch {start_epoch + 1}.")
+    else:
+        print("No checkpoint found. Starting training from scratch.")
+
+    
+    for epoch in range(start_epoch, EPOCHS):
         model.train()
 
         train_loss = 0
@@ -110,21 +130,39 @@ def train():
         avg_val_iou = val_iou / len(val_loader)
         avg_val_f1 = val_f1 / len(val_loader)
 
-        print(f"\nEpoch {epoch + 1}")
+        print(f"\nEpoch {epoch + 1}/{EPOCHS}")
         print(f"Train Loss: {train_loss:.4f}")
         print(f"Validation Loss: {val_loss:.4f}")
         print(f"Train IoU: {avg_train_iou:.4f}")
         print(f"Validation IoU: {avg_val_iou:.4f}")
         print(f"Validation F1-score: {avg_val_f1:.4f}")
 
+        
         if val_loss < best:
             best = val_loss
+
             torch.save(model.state_dict(), MODEL_SAVE_PATH)
-            print(f"Saved best model: {MODEL_SAVE_PATH}")
+
+            print(f"Best model saved: {MODEL_SAVE_PATH}")
+
             wait = 0
         else:
             wait += 1
 
+        
+        checkpoint = {
+            "epoch": epoch,
+            "model_state": model.state_dict(),
+            "optimizer_state": optimizer.state_dict(),
+            "best_val_loss": best,
+            "wait": wait
+        }
+
+        torch.save(checkpoint, CHECKPOINT_PATH)
+
+        print(f"Checkpoint saved: {CHECKPOINT_PATH}")
+
+        
         if wait >= patience:
             print("Early stopping activated.")
             break
