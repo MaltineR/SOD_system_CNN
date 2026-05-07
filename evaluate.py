@@ -3,12 +3,12 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model import DropoutSODModel
+from model import UNetSODModel
 from data_loader import create_loaders
 
 
-MODEL_PATH = "saved_models/agumentations_model.pth"
-OUTPUT_DIR = "outputs/agumentations"
+MODEL_PATH = "saved_models/unet_model.pth"
+OUTPUT_DIR = "outputs/unet"
 
 
 def compute_metrics(pred, mask):
@@ -80,7 +80,7 @@ def evaluate():
 
     _, _, test_loader = create_loaders()
 
-    model = DropoutSODModel().to(device)
+    model = UNetSODModel().to(device)
 
     model.load_state_dict(
         torch.load(MODEL_PATH, map_location=device)
@@ -119,7 +119,7 @@ def evaluate():
     avg_f1 = total_f1 / num_batches
     avg_mae = total_mae / num_batches
 
-    print("\n===== DROPOUT TEST RESULTS =====")
+    print("\n===== UNET TEST RESULTS =====")
     print(f"IoU       : {avg_iou:.4f}")
     print(f"Precision : {avg_precision:.4f}")
     print(f"Recall    : {avg_recall:.4f}")

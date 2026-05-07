@@ -1,14 +1,17 @@
+import os
 import torch
 import torch.nn as nn
-import os
 
-from model import DropoutSODModel
+from model import UNetSODModel
 from data_loader import create_loaders
 
 
-MODEL_NAME = "agumentations"
+MODEL_NAME = "unet"
 MODEL_SAVE_PATH = f"saved_models/{MODEL_NAME}_model.pth"
-LEARNING_RATE = 5e-4
+
+LEARNING_RATE = 1e-3
+EPOCHS = 25
+
 
 def iou(pred, mask):
     pred = (pred > 0.5).float()
@@ -41,16 +44,16 @@ def train():
 
     train_loader, val_loader, _ = create_loaders()
 
-    model = DropoutSODModel().to(device)
+    model = UNetSODModel().to(device)
 
     bce = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     best = 1e9
-    patience = 5
+    patience = 7
     wait = 0
 
-    for epoch in range(20):
+    for epoch in range(EPOCHS):
         model.train()
 
         train_loss = 0
