@@ -2,56 +2,61 @@ import torch
 import torch.nn as nn
 
 
-class SODModel(nn.Module):
+class BaselineSODModel(nn.Module):
     def __init__(self):
-        super(SODModel, self).__init__()
+        super(BaselineSODModel, self).__init__()
 
-        self.enc1 = nn.Sequential(
+        # Encoder
+        self.encoder = nn.Sequential(
             nn.Conv2d(3, 16, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
+            nn.MaxPool2d(2),   # 128 -> 64
 
-        self.enc2 = nn.Sequential(
             nn.Conv2d(16, 32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
+            nn.MaxPool2d(2),   # 64 -> 32
 
-        self.enc3 = nn.Sequential(
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2)
+            nn.MaxPool2d(2),   # 32 -> 16
+
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2)    # 16 -> 8
         )
 
-        self.dec1 = nn.Sequential(
-            nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2),
-            nn.ReLU()
+        # Decoder
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2),  # 8 -> 16
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2),   # 16 -> 32
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2),   # 32 -> 64
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(16, 1, kernel_size=2, stride=2),    # 64 -> 128
+            nn.Sigmoid()
         )
 
-        self.dec2 = nn.Sequential(
-            nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2),
-            nn.ReLU()
-        )
-
-        self.dec3 = nn.Sequential(
-            nn.ConvTranspose2d(16, 8, kernel_size=2, stride=2),
-            nn.ReLU()
-        )
-
-        self.out = nn.Conv2d(8, 1, kernel_size=1)
     def forward(self, x):
-        # Encoder
-        x = self.enc1(x)
-        x = self.enc2(x)
-        x = self.enc3(x)
-         # Decoder
-        x = self.dec1(x)
-        x = self.dec2(x)
-        x = self.dec3(x)
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
 
-        # Output
-        x = self.out(x)
-        x = torch.sigmoid(x)
 
-        return x  
+# Test model
+if __name__ == "__main__":
+    model = BaselineSODModel()
+
+    test_input = torch.randn(8, 3, 128, 128)
+    output = model(test_input)
+
+    print("Input shape:", test_input.shape)
+    print("Output shape:", output.shape)
+
+    if output.shape == torch.Size([8, 1, 128, 128]):
+        print("Model test successful.")
+    else:
+        print("Model output shape is wrong.")
