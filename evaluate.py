@@ -3,12 +3,12 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model import BatchNormSODModel
+from model import DropoutSODModel
 from data_loader import create_loaders
 
 
-MODEL_PATH = "saved_models/batchnorm_model.pth"
-OUTPUT_DIR = "outputs/batchnorm"
+MODEL_PATH = "saved_models/dropout_model.pth"
+OUTPUT_DIR = "outputs/dropout"
 
 
 def compute_metrics(pred, mask):
@@ -80,7 +80,7 @@ def evaluate():
 
     _, _, test_loader = create_loaders()
 
-    model = BatchNormSODModel().to(device)
+    model = DropoutSODModel().to(device)
 
     model.load_state_dict(
         torch.load(MODEL_PATH, map_location=device)
@@ -119,7 +119,7 @@ def evaluate():
     avg_f1 = total_f1 / num_batches
     avg_mae = total_mae / num_batches
 
-    print("\n===== BATCHNORM TEST RESULTS =====")
+    print("\n===== DROPOUT TEST RESULTS =====")
     print(f"IoU       : {avg_iou:.4f}")
     print(f"Precision : {avg_precision:.4f}")
     print(f"Recall    : {avg_recall:.4f}")

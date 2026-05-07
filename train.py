@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 import os
 
-from model import BatchNormSODModel
+from model import DropoutSODModel
 from data_loader import create_loaders
 
 
-MODEL_NAME = "batchnorm"
+MODEL_NAME = "dropout"
 MODEL_SAVE_PATH = f"saved_models/{MODEL_NAME}_model.pth"
 
 
@@ -41,7 +41,7 @@ def train():
 
     train_loader, val_loader, _ = create_loaders()
 
-    model = BatchNormSODModel().to(device)
+    model = DropoutSODModel().to(device)
 
     bce = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
@@ -131,3 +131,4 @@ def train():
 
 if __name__ == "__main__":
     train()
+    
