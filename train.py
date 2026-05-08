@@ -12,7 +12,7 @@ MODEL_SAVE_PATH = f"saved_models/{MODEL_NAME}_model.pth"
 CHECKPOINT_PATH = f"checkpoints/{MODEL_NAME}_checkpoint.pth"
 
 LEARNING_RATE = 1e-3
-EPOCHS = 25
+EPOCHS = 30
 
 
 def iou(pred, mask):
@@ -53,7 +53,7 @@ def train():
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     best = 1e9
-    patience = 7
+    patience = 10
     wait = 0
     start_epoch = 0
 

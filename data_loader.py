@@ -11,7 +11,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 IMAGE_DIR = "data/images"
 MASK_DIR = "data/masks"
 
-IMAGE_SIZE = 128
+IMAGE_SIZE = 224
 BATCH_SIZE = 8
 
 
