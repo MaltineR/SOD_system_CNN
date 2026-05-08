@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 
 from model import UNetSODModel
 from data_loader import create_loaders
@@ -10,6 +11,7 @@ MODEL_NAME = "unet"
 
 MODEL_SAVE_PATH = f"saved_models/{MODEL_NAME}_model.pth"
 CHECKPOINT_PATH = f"checkpoints/{MODEL_NAME}_checkpoint.pth"
+LOSS_CURVE_PATH = "outputs/baseline/loss_curve_unet.png"
 
 LEARNING_RATE = 1e-3
 EPOCHS = 30
@@ -38,6 +40,28 @@ def precision_recall_f1(pred, mask):
     return precision.item(), recall.item(), f1.item()
 
 
+def save_loss_curve(train_losses, val_losses):
+    os.makedirs("outputs/unet", exist_ok=True)
+
+    plt.figure(figsize=(8, 5))
+
+    plt.plot(train_losses, label="Train Loss")
+    plt.plot(val_losses, label="Validation Loss")
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("U-Net Training vs Validation Loss")
+
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+
+    plt.savefig(LOSS_CURVE_PATH, dpi=300)
+    plt.close()
+
+    print(f"Loss curve saved: {LOSS_CURVE_PATH}")
+
+
 def train():
     os.makedirs("saved_models", exist_ok=True)
     os.makedirs("checkpoints", exist_ok=True)
@@ -57,7 +81,9 @@ def train():
     wait = 0
     start_epoch = 0
 
-    
+    train_losses = []
+    val_losses = []
+
     if os.path.exists(CHECKPOINT_PATH):
         checkpoint = torch.load(CHECKPOINT_PATH, map_location=device)
 
@@ -68,11 +94,16 @@ def train():
         best = checkpoint["best_val_loss"]
         wait = checkpoint["wait"]
 
+        if "train_losses" in checkpoint:
+            train_losses = checkpoint["train_losses"]
+
+        if "val_losses" in checkpoint:
+            val_losses = checkpoint["val_losses"]
+
         print(f"Checkpoint found. Resuming training from epoch {start_epoch + 1}.")
     else:
         print("No checkpoint found. Starting training from scratch.")
 
-    
     for epoch in range(start_epoch, EPOCHS):
         model.train()
 
@@ -126,6 +157,9 @@ def train():
         train_loss /= len(train_loader)
         val_loss /= len(val_loader)
 
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+
         avg_train_iou = train_iou / len(train_loader)
         avg_val_iou = val_iou / len(val_loader)
         avg_val_f1 = val_f1 / len(val_loader)
@@ -137,7 +171,6 @@ def train():
         print(f"Validation IoU: {avg_val_iou:.4f}")
         print(f"Validation F1-score: {avg_val_f1:.4f}")
 
-        
         if val_loss < best:
             best = val_loss
 
@@ -149,23 +182,27 @@ def train():
         else:
             wait += 1
 
-        
         checkpoint = {
             "epoch": epoch,
             "model_state": model.state_dict(),
             "optimizer_state": optimizer.state_dict(),
             "best_val_loss": best,
-            "wait": wait
+            "wait": wait,
+            "train_losses": train_losses,
+            "val_losses": val_losses
         }
 
         torch.save(checkpoint, CHECKPOINT_PATH)
 
         print(f"Checkpoint saved: {CHECKPOINT_PATH}")
 
-        
+        save_loss_curve(train_losses, val_losses)
+
         if wait >= patience:
             print("Early stopping activated.")
             break
+
+    save_loss_curve(train_losses, val_losses)
 
     print("\nTraining finished.")
 
