@@ -1,6 +1,6 @@
-# Salient Object Detection (SOD) from Scratch
+# Salient Object Detection (SOD) using the foundational Machine Learning and Deep Learning concepts
 
-This project implements a Salient Object Detection (SOD) system from scratch using PyTorch.  
+This project implements a Salient Object Detection (SOD) system using PyTorch.  
 The goal is to detect and segment the most visually important object in an image and generate a saliency mask with an overlay visualization.
 
 ---
