@@ -19,7 +19,7 @@ The project includes a complete deep learning pipeline:
 - Training and validation loop
 - Evaluation metrics
 - Visualization of predictions
-- Jupyter Notebook demo
+- Streamlit App demo
 - Checkpoint saving and resume functionality
 
 ---
@@ -134,16 +134,15 @@ outputs/unet/
 
 ### 4. Run the demo
 
-Open:
+run:
 
 ```text
-demo_notebook.ipynb
+streamlit run app.py
 ```
 
-The notebook shows:
+The app shows:
 
 - Input image
-- Ground-truth mask
 - Predicted saliency mask
 - Overlay visualization
 - Inference time per image
